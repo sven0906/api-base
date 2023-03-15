@@ -103,18 +103,12 @@ def list_to_html(items: list) -> str:
 
     # 테이블 생성
     table = f"<table style='border: 1px solid black;'>{header}{rows}</table>"
-    return table
-    # df = pd.DataFrame(alist)
-    #
-    # df_html = df.to_html(index=False, justify="center", render_links=True, escape=False)
-    # df_html = df_html.replace(
-    #     '<table border="1" class="dataframe">',
-    #     '<table border="0" class="dataframe" bgcolor=black cellpadding=1 cellspacing=1><tr><td><table border="0" class="dataframe" bgcolor=black>',
-    # )
-    # df_html = df_html.replace("</table>", "</table> </td></tr></table>")
-    # df_html = df_html.replace("<td>", "<td bgcolor=white style='text-align: center;'>")
-    # df_html = df_html.replace("<th>", "<th bgcolor=#e5e5e5 style='padding: 0px 80px;'>")
-    # return df_html
+
+    # 메일 전송 URL HTML 생성
+    collected_html = "<li>현재까지 수집된 최신 정보를 메일로 받기: http://52.90.170.40:8000/api/v1/stocks/</li>"
+
+    return table + collected_html
+
 def crawler_dyson_stocks(region="UK"):
     # from stocks.models import Stock, StockDetail
 
