@@ -25,6 +25,7 @@ DYSON_NAME = {
     "New 30mm Airwrap™ barrel(Nickel / Fuchsia)": "30mm-airwrap-barrel-iron-fuchsia",
 }
 
+
 def get_stock_list_for_table() -> list:
     stock_list_qs = Stock.objects.exclude(region="UK")
     stock_list_qs = (
@@ -46,17 +47,20 @@ def get_stock_list_for_table() -> list:
         "stockdetail__modified_time",
     )
     return items
+
+
 def send_mail(items):
     items = items.order_by("region")
     html = list_to_html(items)
     email = EmailMessage(
         f"Dyson 재고현황",  # 제목
         html,  # 내용
-        # to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
-        to=["jhl0906@naver.com"],  # 받는 이메일 리스트
+        to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
+        # to=["jhl0906@naver.com"],  # 받는 이메일 리스트
     )
     email.content_subtype = "html"
     email.send()
+
 
 def list_to_html(items: list) -> str:
     present_list = [
@@ -80,9 +84,13 @@ def list_to_html(items: list) -> str:
         purple = ""
         for item in items:
             if item[1] == key and item[2] == "Fuchsia" and item[3]:
-                fuchsia += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
+                fuchsia += (
+                    f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
+                )
             elif (item[1] == key and item[2] == "Fuchsia") and not item[3]:
-                fuchsia += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+                fuchsia += (
+                    f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+                )
             if item[1] == key and item[2] == "Iron" and item[3]:
                 iron += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] == "Iron") and not item[3]:
@@ -107,12 +115,18 @@ def list_to_html(items: list) -> str:
         )
 
     # 테이블 헤더 생성
-    header = "<tr style='border: 1px solid black;'>" + "".join([f"<th>{key}</th>" for key in alist[0].keys()]) + "</tr>"
+    header = (
+        "<tr style='border: 1px solid black;'>"
+        + "".join([f"<th>{key}</th>" for key in alist[0].keys()])
+        + "</tr>"
+    )
 
     # 테이블 본문 생성
     rows = ""
     for row in alist:
-        cells = "".join([f"<td style='border: 1px solid black;'>{value}</td>" for value in row.values()])
+        cells = "".join(
+            [f"<td style='border: 1px solid black;'>{value}</td>" for value in row.values()]
+        )
         rows += "<tr>" + cells + "</tr>"
 
     # 테이블 생성
@@ -122,6 +136,7 @@ def list_to_html(items: list) -> str:
     collected_html = "<li>현재까지 수집된 최신 정보를 메일로 받기: http://52.90.170.40:8000/api/v1/stocks/</li>"
 
     return table + collected_html
+
 
 def crawler_dyson_stocks(region="UK"):
     # from stocks.models import Stock, StockDetail
@@ -170,6 +185,8 @@ def crawler_dyson_stocks(region="UK"):
         dyson_url = "https://www.dyson.com.tr/"
         host = "www.dyson.com.tr"
         find_text = ""
+    else:
+        dyson_url = ""
 
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -246,6 +263,20 @@ def crawler_dyson_stocks(region="UK"):
                 stock_dict[item_no] = False
 
         for name, number in item_numbers.items():
+            if number in [
+                "970290-01",
+                "970290-02",
+                "970289-01",
+                "970289-02",
+                "970735-01",
+                "970736-01",
+                "969470-01",
+                "969473-01",
+                "969466-01",
+                "969468-01",
+            ]:
+                continue
+
             if name.find("Iron") != -1:
                 color = "Iron"
             elif name.find("Copper") != -1:
@@ -317,6 +348,20 @@ def crawler_dyson_stocks(region="UK"):
 
     else:
         for name, number in item_numbers.items():
+            if number in [
+                "970290-01",
+                "970290-02",
+                "970289-01",
+                "970289-02",
+                "970735-01",
+                "970736-01",
+                "969470-01",
+                "969473-01",
+                "969466-01",
+                "969468-01",
+            ] and region in ["NL"]:
+                continue
+
             # 독일, 스페인의 경우 URL 별도 처리
             if region == "DE":
                 if number in [
@@ -325,9 +370,11 @@ def crawler_dyson_stocks(region="UK"):
                     "969473-01",
                     "969468-01",
                 ]:
+                    dyson_url = dyson_url[:-6]
                     number = f"spare-details.{number}"
             elif region == "ES":
                 if number in ["969473-01", "969468-01"]:
+                    dyson_url = dyson_url[:-6]
                     number = f"spare-details.{number}"
             response = requests.get(url=f"{dyson_url}{number}", headers=headers)
             html_text = response.text
