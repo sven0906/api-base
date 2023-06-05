@@ -175,18 +175,28 @@ def crawler_dyson_stocks(region="UK"):
         "New 40mm Airwrap™ long barrel(Nickel / Iron)": "971889-08",
         "New 40mm Airwrap™ long barrel(Nickel / Copper)": "971889-07",
         "New 40mm Airwrap™ long barrel(Nickel / Fuchsia)": "971889-05",
+        "40mm Airwrap™ long barrel(Nickel / Fuchsia)": "970290-01",  # 40mm 구형 롱배럴(핑크)
+        "40mm Airwrap™ long barrel(Black / Purple)": "970290-02",  # 40mm 구형 롱배럴(퍼플)
         "New 30mm Airwrap™ long barrel(Nickel / Iron)": "971888-08",
         "New 30mm Airwrap™ long barrel(Nickel / Copper)": "971888-07",
         "New 30mm Airwrap™ long barrel(Nickel / Fuchsia)": "971888-05",
+        "30mm Airwrap™ long barrel(Nickel / Fuchsia)": "970289-01",  # 30mm 구형 롱배럴(핑크)
+        "30mm Airwrap™ long barrel(Black / Purple)": "970289-02",  # 30mm 구형 롱배럴(퍼플)
         "New 20mm Airwrap™ barrel(Nickel / Iron)": "971890-04",
         "New 20mm Airwrap™ barrel(Nickel / Copper)": "971890-03",
         "New 20mm Airwrap™ barrel(Nickel / Fuchsia)": "971890-01",
+        "20mm Airwrap™ long barrel(Nickel / Fuchsia)": "970735-01",  # 20mm 구형 롱배럴(핑크)
+        "20mm Airwrap™ long barrel(Black / Purple)": "970736-01",  # 20mm 구형 롱배럴(퍼플)
         "New 40mm Airwrap™ barrel(Nickel / Iron)": "971889-04",
         "New 40mm Airwrap™ barrel(Nickel / Copper)": "971889-03",
         "New 40mm Airwrap™ barrel(Nickel / Fuchsia)": "971889-01",
+        "40mm Airwrap™ barrel(Nickel / Fuchsia)": "969470-01",  # 40mm 구형 숏배럴(핑크)
+        "40mm Airwrap™ barrel(Black / Purple)": "969473-01",  # 40mm 구형 숏배럴(퍼플)
         "New 30mm Airwrap™ barrel(Nickel / Iron)": "971888-04",
         "New 30mm Airwrap™ barrel(Nickel / Copper)": "971888-03",
         "New 30mm Airwrap™ barrel(Nickel / Fuchsia)": "971888-01",
+        "30mm Airwrap™ barrel(Nickel / Fuchsia)": "969466-01",  # 30mm 구형 숏배럴(핑크)
+        "30mm Airwrap™ barrel(Black / Purple)": "969468-01",  # 30mm 구형 숏배럴(핑크)
         "New Soft smoothing brush(Nickel / Iron)": "971891-08",
         "New Soft smoothing brush(Nickel / Copper)": "971891-07",
         "New Soft smoothing brush(Nickel / Fuchsia)": "971891-05",
@@ -261,6 +271,8 @@ def crawler_dyson_stocks(region="UK"):
                 color = "Copper"
             elif name.find("Fuchsia") != -1:
                 color = "Fuchsia"
+            elif name.find("Purple") != -1:
+                color = "Purple"
             else:
                 color = None
 
@@ -289,6 +301,18 @@ def crawler_dyson_stocks(region="UK"):
 
     else:
         for name, number in item_numbers.items():
+            # 독일, 스페인의 경우 URL 별도 처리
+            if region == "DE":
+                if number in [
+                    "970735-01",
+                    "970736-01",
+                    "969473-01",
+                    "969468-01",
+                ]:
+                    number = f"spare-details.${number}"
+            elif region == "ES":
+                if number in ["969473-01", "969468-01"]:
+                    number = f"spare-details.${number}"
             response = requests.get(url=f"{dyson_url}{number}", headers=headers)
             html_text = response.text
 
@@ -304,6 +328,8 @@ def crawler_dyson_stocks(region="UK"):
                 color = "Copper"
             elif name.find("Fuchsia") != -1:
                 color = "Fuchsia"
+            elif name.find("Purple") != -1:
+                color = "Purple"
             else:
                 color = None
 
