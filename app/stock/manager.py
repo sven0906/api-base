@@ -55,8 +55,8 @@ def send_mail(items):
     email = EmailMessage(
         f"Dyson 재고현황",  # 제목
         html,  # 내용
-        # to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
-        to=["jhl0906@naver.com"],  # 받는 이메일 리스트
+        to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
+        # to=["jhl0906@naver.com"],  # 받는 이메일 리스트
     )
     email.content_subtype = "html"
     email.send()
