@@ -26,8 +26,7 @@ DYSON_NAME = {
 }
 
 def get_stock_list_for_table() -> list:
-    # stock_list_qs = Stock.objects.exclude(region="UK")
-    stock_list_qs = Stock.objects.filter(region="DE")
+    stock_list_qs = Stock.objects.exclude(region="UK")
     stock_list_qs = (
         stock_list_qs.filter(name__startswith="New 20mm Airwrap")
         | stock_list_qs.filter(name__startswith="New 30mm Airwrap")
@@ -53,8 +52,8 @@ def send_mail(items):
     email = EmailMessage(
         f"Dyson 재고현황",  # 제목
         html,  # 내용
-        # to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
-        to=["jhl0906@naver.com"],  # 받는 이메일 리스트
+        to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
+        # to=["jhl0906@naver.com"],  # 받는 이메일 리스트
     )
     email.content_subtype = "html"
     email.send()
@@ -126,7 +125,6 @@ def list_to_html(items: list) -> str:
 
 def crawler_dyson_stocks(region="UK"):
     # from stocks.models import Stock, StockDetail
-    print('crawler_dyson_stocks region:', region)
 
     host = "www.dyson.co.uk"
     find_text = "Add to"
@@ -321,7 +319,6 @@ def crawler_dyson_stocks(region="UK"):
         for name, number in item_numbers.items():
             # 독일, 스페인의 경우 URL 별도 처리
             if region == "DE":
-                print('de, number, type(number)', region, number, type(number))
                 if number in [
                     "970735-01",
                     "970736-01",
@@ -329,7 +326,6 @@ def crawler_dyson_stocks(region="UK"):
                     "969468-01",
                 ]:
                     number = f"spare-details.{number}"
-                    print('number:', number)
             elif region == "ES":
                 if number in ["969473-01", "969468-01"]:
                     number = f"spare-details.{number}"
