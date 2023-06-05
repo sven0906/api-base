@@ -348,6 +348,9 @@ def crawler_dyson_stocks(region="UK"):
 
     else:
         for name, number in item_numbers.items():
+            new_dyson_url = dyson_url
+            new_number = number
+
             if number in [
                 "970290-01",
                 "970290-02",
@@ -376,9 +379,6 @@ def crawler_dyson_stocks(region="UK"):
                 if number in ["969473-01", "969468-01"]:
                     new_dyson_url = dyson_url[:-6]
                     new_number = f"spare-details.{number}"
-            else:
-                new_dyson_url = dyson_url
-                new_number = number
             response = requests.get(url=f"{new_dyson_url}{new_number}", headers=headers)
             html_text = response.text
 
