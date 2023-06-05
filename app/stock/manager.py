@@ -370,13 +370,16 @@ def crawler_dyson_stocks(region="UK"):
                     "969473-01",
                     "969468-01",
                 ]:
-                    dyson_url = dyson_url[:-6]
-                    number = f"spare-details.{number}"
+                    new_dyson_url = dyson_url[:-6]
+                    new_number = f"spare-details.{number}"
             elif region == "ES":
                 if number in ["969473-01", "969468-01"]:
-                    dyson_url = dyson_url[:-6]
-                    number = f"spare-details.{number}"
-            response = requests.get(url=f"{dyson_url}{number}", headers=headers)
+                    new_dyson_url = dyson_url[:-6]
+                    new_number = f"spare-details.{number}"
+            else:
+                new_dyson_url = dyson_url
+                new_number = number
+            response = requests.get(url=f"{new_dyson_url}{new_number}", headers=headers)
             html_text = response.text
 
             # US의 경우 "You may also be interested in" 섹션이 존재하므로 제거
