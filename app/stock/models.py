@@ -32,6 +32,7 @@ class StockDetail(models.Model):
         ("Iron", "Iron"),
         ("Copper", "Copper"),
         ("Fuchsia", "Fuchsia"),
+        ("Purple", "Purple"),
     )
     stock = models.ForeignKey("Stock", on_delete=models.CASCADE)
     link = models.URLField("링크", null=True)

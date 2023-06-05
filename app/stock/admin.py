@@ -8,4 +8,9 @@ class StockAdmin(admin.ModelAdmin):
 
 @admin.register(StockDetail)
 class StockDetailAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in StockDetail._meta.fields]
+    list_display = ['id', 'stock', 'get_region', 'link', 'color', 'is_stock', 'created_time', 'modified_time']
+
+    @admin.display(description='stock__region')
+    def get_region(self, obj):
+        return obj.stock.region
+

@@ -26,12 +26,16 @@ DYSON_NAME = {
 }
 
 def get_stock_list_for_table() -> list:
-    stock_list_qs = Stock.objects.exclude(region="UK")
+    # stock_list_qs = Stock.objects.exclude(region="UK")
+    stock_list_qs = Stock.objects.filter(region="DE")
     stock_list_qs = (
         stock_list_qs.filter(name__startswith="New 20mm Airwrap")
         | stock_list_qs.filter(name__startswith="New 30mm Airwrap")
         | stock_list_qs.filter(name__startswith="New 40mm Airwrap")
         | stock_list_qs.filter(name__startswith="New Coanda")
+        | stock_list_qs.filter(name__startswith="40mm Airwrap")
+        | stock_list_qs.filter(name__startswith="30mm Airwrap")
+        | stock_list_qs.filter(name__startswith="20mm Airwrap")
     )
 
     items = stock_list_qs.values_list(
@@ -49,8 +53,8 @@ def send_mail(items):
     email = EmailMessage(
         f"Dyson 재고현황",  # 제목
         html,  # 내용
-        to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
-        # to=["jhl0906@naver.com"],  # 받는 이메일 리스트
+        # to=["jhl0906@naver.com", "jarketss@gmail.com"],  # 받는 이메일 리스트
+        to=["jhl0906@naver.com"],  # 받는 이메일 리스트
     )
     email.content_subtype = "html"
     email.send()
@@ -63,12 +67,18 @@ def list_to_html(items: list) -> str:
         ("New 40mm Airwrap™ barrel", "숏40"),
         ("New 30mm Airwrap™ barrel", "숏30"),
         ("New Coanda smoothing dryer", "코안다"),
+        ("40mm Airwrap™ long barrel", "롱40(구)"),
+        ("30mm Airwrap™ long barrel", "롱30(구)"),
+        ("20mm Airwrap™ long barrel", "롱20(구)"),
+        ("40mm Airwrap™ barrel", "숏40(구)"),
+        ("30mm Airwrap™ barrel", "숏30(구)"),
     ]
     alist = []
     for key, value in present_list:
         fuchsia = ""
         iron = ""
         copper = ""
+        purple = ""
         for item in items:
             if item[1] == key and item[2] == "Fuchsia" and item[3]:
                 fuchsia += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
@@ -82,6 +92,10 @@ def list_to_html(items: list) -> str:
                 copper += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] == "Copper") and not item[3]:
                 copper += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+            if item[1] == key and item[2] == "Purple" and item[3]:
+                purple += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
+            elif (item[1] == key and item[2] == "Purple") and not item[3]:
+                purple += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
 
         alist.append(
             {
@@ -89,6 +103,7 @@ def list_to_html(items: list) -> str:
                 "핑크": "·".join(fuchsia.split("\n")),
                 "코퍼": "·".join(copper.split("\n")),
                 "아이언": "·".join(iron.split("\n")),
+                "퍼플": "·".join(purple.split("\n")),
             }
         )
 
@@ -111,6 +126,7 @@ def list_to_html(items: list) -> str:
 
 def crawler_dyson_stocks(region="UK"):
     # from stocks.models import Stock, StockDetail
+    print('crawler_dyson_stocks region:', region)
 
     host = "www.dyson.co.uk"
     find_text = "Add to"
@@ -196,7 +212,7 @@ def crawler_dyson_stocks(region="UK"):
         "New 30mm Airwrap™ barrel(Nickel / Copper)": "971888-03",
         "New 30mm Airwrap™ barrel(Nickel / Fuchsia)": "971888-01",
         "30mm Airwrap™ barrel(Nickel / Fuchsia)": "969466-01",  # 30mm 구형 숏배럴(핑크)
-        "30mm Airwrap™ barrel(Black / Purple)": "969468-01",  # 30mm 구형 숏배럴(핑크)
+        "30mm Airwrap™ barrel(Black / Purple)": "969468-01",  # 30mm 구형 숏배럴(퍼플)
         "New Soft smoothing brush(Nickel / Iron)": "971891-08",
         "New Soft smoothing brush(Nickel / Copper)": "971891-07",
         "New Soft smoothing brush(Nickel / Fuchsia)": "971891-05",
@@ -238,6 +254,8 @@ def crawler_dyson_stocks(region="UK"):
                 color = "Copper"
             elif name.find("Fuchsia") != -1:
                 color = "Fuchsia"
+            elif name.find("Purple") != -1:
+                color = "Purple"
             else:
                 color = None
 
@@ -303,16 +321,18 @@ def crawler_dyson_stocks(region="UK"):
         for name, number in item_numbers.items():
             # 독일, 스페인의 경우 URL 별도 처리
             if region == "DE":
+                print('de, number, type(number)', region, number, type(number))
                 if number in [
                     "970735-01",
                     "970736-01",
                     "969473-01",
                     "969468-01",
                 ]:
-                    number = f"spare-details.${number}"
+                    number = f"spare-details.{number}"
+                    print('number:', number)
             elif region == "ES":
                 if number in ["969473-01", "969468-01"]:
-                    number = f"spare-details.${number}"
+                    number = f"spare-details.{number}"
             response = requests.get(url=f"{dyson_url}{number}", headers=headers)
             html_text = response.text
 
