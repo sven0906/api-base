@@ -1,6 +1,23 @@
 version: "3.7"
 
 services:
+  db:
+    image: mysql
+    container_name: "mysql_service"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=admin
+#      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+#      - ./mysql_data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
   app:
     build:
       context: .
@@ -11,4 +28,14 @@ services:
     volumes:
       - ./app:/app
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000 --noreload"
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 --noreload && python manage.py process_tasks"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  mysql-data:
+
+
+
+
+
