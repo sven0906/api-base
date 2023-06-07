@@ -79,10 +79,27 @@ WSGI_APPLICATION = "app.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {"timeout": 60},
-    }
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "app",
+        "USER": "admin",
+        "PASSWORD": "admin",
+        "HOST": "mysql_service",
+        "PORT": "3306",
+        "OPTIONS": {
+            "init_command": ";".join(
+                [
+                    "SET sql_mode='STRICT_TRANS_TABLES'",
+                    "SET NAMES utf8mb4 COLLATE utf8mb4_general_ci",
+                ]
+            ),
+            "charset": "utf8mb4",
+        },
+    },
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    #     "OPTIONS": {"timeout": 60},
+    # },
 }
 
 

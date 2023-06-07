@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Stock(models.Model):
     BRAND_CHOICE = (("DY", "Dyson"),)
     REGION_CHOICE = (
