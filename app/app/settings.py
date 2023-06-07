@@ -176,3 +176,6 @@ LOGGING = {
         "django": {"handlers": ["file"], "level": "INFO"},
     },
 }
+
+BACKGROUND_TASK_RUN_ASYNC = True
+BACKGROUND_TASK_ASYNC_THREADS = 20
