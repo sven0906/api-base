@@ -10,7 +10,7 @@ services:
       - MYSQL_DATABASE=app
       - MYSQL_USER=admin
       - MYSQL_PASSWORD=admin
-#      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
     volumes:
 #      - ./mysql_data:/var/lib/mysql
       - mysql-data:/var/lib/mysql

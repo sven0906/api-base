@@ -1,8 +1,10 @@
+import logging
 import time
 import requests
 from django.core.mail import EmailMessage
 from stock.models import Stock, StockDetail
 
+logger = logging.getLogger(__name__)
 
 DYSON_NAME = {
     "New Coanda smoothing dryer(Nickel / Iron)": "coanda-smoothing-dryer-iron-nickel",
@@ -246,178 +248,182 @@ def crawler_dyson_stocks(region="UK"):
         "upgrade kit: Complete": "971874-16",
     }
 
-    # 일본사이트는 페이지 구성이 다름..
-    if region == "JP":
-        response = requests.get(
-            url=f"https://www.dyson.co.jp/api/ProductPricingAndAvailability?productIds=f6a67052-3345-4b26-ae6c-2d4174155c85&productIds=1c6b87ce-ad58-426b-a009-9dcb8cfce736&productIds=dbe1bc70-855f-45c7-ad2e-f39952ea1fdc&productIds=50f7d684-3fec-46fa-b31c-1e7e73be8274&productIds=cbd94a03-f90f-4313-9b37-2308cbeedcb1&productIds=0d2bb7e1-2d1a-4007-b5cc-42825d709219&productIds=652701e9-ef2d-43d1-843a-39583c95676b&productIds=6f670c53-ef52-4667-8f75-51711be0136d&productIds=3ba20954-0346-49e5-badf-9e71dfcebdec&productIds=fe45ef0d-37dc-4e71-93c1-7047bf686ee8&productIds=90ed2660-a27b-49fa-8ac2-447ddc6e93a0&productIds=1f00d107-299d-462b-8ceb-c2149128f882&productIds=4f3bf81c-3488-4fd2-b9bb-d047ecc3de6e&productIds=ab76d692-a16f-430d-9a11-bd24da1ab425&productIds=f69d6760-2900-4b5d-9583-1a4dacbe6d6e&productIds=d03ad326-bae1-4b65-a0cc-2ef41f0b632b&productIds=d1b74c61-d9f3-416b-ae82-d41438a49ab9&productIds=66ee4e40-cb9a-4be5-9f97-1db40cb25ce6&productIds=6ece57ed-eebb-43cc-b7b6-8f10d1d66ec9&productIds=ab82d6dd-698f-474e-a315-28564d2692cc&productIds=2762802d-b7ee-49e3-b0c1-9807b3536642&productIds=c010ede7-8c15-4635-a0e0-9ea3b387ad00&productIds=a0e5102e-fef1-44f5-a0a5-5bae9d70101e&productIds=845de55e-3ee9-4460-b68f-0a479e6e9181&productIds=82119cd5-044f-41bb-a125-979786a7645f&productIds=a38f437a-70df-4aa6-a7bf-e22762966cfb&productIds=ae37b1bd-4dcd-490b-9b8f-5712da8ff463&productIds=54ce91a2-095f-4103-8f35-5ad34cffe995&productIds=7c0f95f3-61d7-4e80-8321-5ae499c7f8b6&productIds=276d6d51-de7e-45d8-9128-3cbfa0349881&productIds=d708b394-e37f-410a-b5b2-7c4f32f62f4a&productIds=b3a21db3-78ef-402d-b16a-59ad32b9f305&productIds=0c6b2f11-ec34-440d-ad73-370c9a137160&productIds=297e3f62-afdd-48af-bd10-b965f412f26f",
-            headers=headers,
-        )
-
-        time.sleep(3)
-        stock_dict = {}
-        for data in response.json():
-            item_no = data.get("AvailabilityButton").get("AnalyticsLabel")[-9:]
-            if data.get("AvailabilityButton").get("Text") == "カートに入れる":
-                stock_dict[item_no] = True
-            else:
-                stock_dict[item_no] = False
-
-        for name, number in item_numbers.items():
-            if number in [
-                "970290-01",
-                "970290-02",
-                "970289-01",
-                "970289-02",
-                "970735-01",
-                "970736-01",
-                "969470-01",
-                "969473-01",
-                "969466-01",
-                "969468-01",
-            ]:
-                continue
-
-            if name.find("Iron") != -1:
-                color = "Iron"
-            elif name.find("Copper") != -1:
-                color = "Copper"
-            elif name.find("Fuchsia") != -1:
-                color = "Fuchsia"
-            elif name.find("Purple") != -1:
-                color = "Purple"
-            else:
-                color = None
-
-            stock, created = Stock.objects.get_or_create(
-                name=name[: name.find("(")], region=region
+    try:
+        # 일본사이트는 페이지 구성이 다름..
+        if region == "JP":
+            response = requests.get(
+                url=f"https://www.dyson.co.jp/api/ProductPricingAndAvailability?productIds=f6a67052-3345-4b26-ae6c-2d4174155c85&productIds=1c6b87ce-ad58-426b-a009-9dcb8cfce736&productIds=dbe1bc70-855f-45c7-ad2e-f39952ea1fdc&productIds=50f7d684-3fec-46fa-b31c-1e7e73be8274&productIds=cbd94a03-f90f-4313-9b37-2308cbeedcb1&productIds=0d2bb7e1-2d1a-4007-b5cc-42825d709219&productIds=652701e9-ef2d-43d1-843a-39583c95676b&productIds=6f670c53-ef52-4667-8f75-51711be0136d&productIds=3ba20954-0346-49e5-badf-9e71dfcebdec&productIds=fe45ef0d-37dc-4e71-93c1-7047bf686ee8&productIds=90ed2660-a27b-49fa-8ac2-447ddc6e93a0&productIds=1f00d107-299d-462b-8ceb-c2149128f882&productIds=4f3bf81c-3488-4fd2-b9bb-d047ecc3de6e&productIds=ab76d692-a16f-430d-9a11-bd24da1ab425&productIds=f69d6760-2900-4b5d-9583-1a4dacbe6d6e&productIds=d03ad326-bae1-4b65-a0cc-2ef41f0b632b&productIds=d1b74c61-d9f3-416b-ae82-d41438a49ab9&productIds=66ee4e40-cb9a-4be5-9f97-1db40cb25ce6&productIds=6ece57ed-eebb-43cc-b7b6-8f10d1d66ec9&productIds=ab82d6dd-698f-474e-a315-28564d2692cc&productIds=2762802d-b7ee-49e3-b0c1-9807b3536642&productIds=c010ede7-8c15-4635-a0e0-9ea3b387ad00&productIds=a0e5102e-fef1-44f5-a0a5-5bae9d70101e&productIds=845de55e-3ee9-4460-b68f-0a479e6e9181&productIds=82119cd5-044f-41bb-a125-979786a7645f&productIds=a38f437a-70df-4aa6-a7bf-e22762966cfb&productIds=ae37b1bd-4dcd-490b-9b8f-5712da8ff463&productIds=54ce91a2-095f-4103-8f35-5ad34cffe995&productIds=7c0f95f3-61d7-4e80-8321-5ae499c7f8b6&productIds=276d6d51-de7e-45d8-9128-3cbfa0349881&productIds=d708b394-e37f-410a-b5b2-7c4f32f62f4a&productIds=b3a21db3-78ef-402d-b16a-59ad32b9f305&productIds=0c6b2f11-ec34-440d-ad73-370c9a137160&productIds=297e3f62-afdd-48af-bd10-b965f412f26f",
+                headers=headers,
             )
 
-            # 해당 품번호의 재고 상태 확인
-            try:
-                is_stock = stock_dict[number]
-            except:
-                is_stock = False
-
-            # 재고 상태 업데이트
-            StockDetail.objects.update_or_create(
-                stock=stock,
-                color=color,
-                link=f"{dyson_url}",
-                defaults={"is_stock": True} if is_stock else {"is_stock": False},
-            )
-    elif region == "HK" or region == "KR":
-        for name, product_name in DYSON_NAME.items():
-            response = requests.get(url=f"{dyson_url}{product_name}", headers=headers)
-            html_text = response.text
-
-            text_index = html_text.find(find_text)
-
-            if name.find("Iron") != -1:
-                color = "Iron"
-            elif name.find("Copper") != -1:
-                color = "Copper"
-            elif name.find("Fuchsia") != -1:
-                color = "Fuchsia"
-            elif name.find("Purple") != -1:
-                color = "Purple"
-            else:
-                color = None
-
-            if name.find("(") != -1:
-                stock, created = Stock.objects.get_or_create(
-                    name=name[: name.find("(")], region=region
-                )
-            else:
-                stock, created = Stock.objects.get_or_create(name=name, region=region)
-
-            if text_index != -1:
-                StockDetail.objects.update_or_create(
-                    stock=stock,
-                    color=color,
-                    link=f"{dyson_url}{product_name}",
-                    defaults={"is_stock": True},
-                )
-            else:
-                StockDetail.objects.update_or_create(
-                    stock=stock,
-                    color=color,
-                    link=f"{dyson_url}{product_name}",
-                    defaults={"is_stock": False},
-                )
             time.sleep(3)
+            stock_dict = {}
+            for data in response.json():
+                item_no = data.get("AvailabilityButton").get("AnalyticsLabel")[-9:]
+                if data.get("AvailabilityButton").get("Text") == "カートに入れる":
+                    stock_dict[item_no] = True
+                else:
+                    stock_dict[item_no] = False
 
-    else:
-        for name, number in item_numbers.items():
-            new_dyson_url = dyson_url
-            new_number = number
-
-            if number in [
-                "970290-01",
-                "970290-02",
-                "970289-01",
-                "970289-02",
-                "970735-01",
-                "970736-01",
-                "969470-01",
-                "969473-01",
-                "969466-01",
-                "969468-01",
-            ] and region in ["NL"]:
-                continue
-
-            # 독일, 스페인의 경우 URL 별도 처리
-            if region == "DE":
+            for name, number in item_numbers.items():
                 if number in [
+                    "970290-01",
+                    "970290-02",
+                    "970289-01",
+                    "970289-02",
                     "970735-01",
                     "970736-01",
+                    "969470-01",
                     "969473-01",
+                    "969466-01",
                     "969468-01",
                 ]:
-                    new_dyson_url = dyson_url[:-6]
-                    new_number = f"spare-details.{number}"
-            elif region == "ES":
-                if number in ["969473-01", "969468-01"]:
-                    new_dyson_url = dyson_url[:-6]
-                    new_number = f"spare-details.{number}"
-            response = requests.get(url=f"{new_dyson_url}{new_number}", headers=headers)
-            html_text = response.text
+                    continue
 
-            # US의 경우 "You may also be interested in" 섹션이 존재하므로 제거
-            if html_text.find("You may also") != -1:
-                html_text = html_text[: html_text.find("You may also")]
+                if name.find("Iron") != -1:
+                    color = "Iron"
+                elif name.find("Copper") != -1:
+                    color = "Copper"
+                elif name.find("Fuchsia") != -1:
+                    color = "Fuchsia"
+                elif name.find("Purple") != -1:
+                    color = "Purple"
+                else:
+                    color = None
 
-            text_index = html_text.find(find_text)
-
-            if name.find("Iron") != -1:
-                color = "Iron"
-            elif name.find("Copper") != -1:
-                color = "Copper"
-            elif name.find("Fuchsia") != -1:
-                color = "Fuchsia"
-            elif name.find("Purple") != -1:
-                color = "Purple"
-            else:
-                color = None
-
-            if name.find("(") != -1:
                 stock, created = Stock.objects.get_or_create(
                     name=name[: name.find("(")], region=region
                 )
-            else:
-                stock, created = Stock.objects.get_or_create(name=name, region=region)
 
-            if text_index != -1:
+                # 해당 품번호의 재고 상태 확인
+                try:
+                    is_stock = stock_dict[number]
+                except:
+                    is_stock = False
+
+                # 재고 상태 업데이트
                 StockDetail.objects.update_or_create(
                     stock=stock,
                     color=color,
-                    link=f"{dyson_url}{number}",
-                    defaults={"is_stock": True},
+                    link=f"{dyson_url}",
+                    defaults={"is_stock": True} if is_stock else {"is_stock": False},
                 )
-            else:
-                StockDetail.objects.update_or_create(
-                    stock=stock,
-                    color=color,
-                    link=f"{dyson_url}{number}",
-                    defaults={"is_stock": False},
-                )
-            time.sleep(3)
+        elif region == "HK" or region == "KR":
+            for name, product_name in DYSON_NAME.items():
+                response = requests.get(url=f"{dyson_url}{product_name}", headers=headers)
+                html_text = response.text
+
+                text_index = html_text.find(find_text)
+
+                if name.find("Iron") != -1:
+                    color = "Iron"
+                elif name.find("Copper") != -1:
+                    color = "Copper"
+                elif name.find("Fuchsia") != -1:
+                    color = "Fuchsia"
+                elif name.find("Purple") != -1:
+                    color = "Purple"
+                else:
+                    color = None
+
+                if name.find("(") != -1:
+                    stock, created = Stock.objects.get_or_create(
+                        name=name[: name.find("(")], region=region
+                    )
+                else:
+                    stock, created = Stock.objects.get_or_create(name=name, region=region)
+
+                if text_index != -1:
+                    StockDetail.objects.update_or_create(
+                        stock=stock,
+                        color=color,
+                        link=f"{dyson_url}{product_name}",
+                        defaults={"is_stock": True},
+                    )
+                else:
+                    StockDetail.objects.update_or_create(
+                        stock=stock,
+                        color=color,
+                        link=f"{dyson_url}{product_name}",
+                        defaults={"is_stock": False},
+                    )
+                time.sleep(3)
+
+        else:
+            for name, number in item_numbers.items():
+                new_dyson_url = dyson_url
+                new_number = number
+
+                if number in [
+                    "970290-01",
+                    "970290-02",
+                    "970289-01",
+                    "970289-02",
+                    "970735-01",
+                    "970736-01",
+                    "969470-01",
+                    "969473-01",
+                    "969466-01",
+                    "969468-01",
+                ] and region in ["NL"]:
+                    continue
+
+                # 독일, 스페인의 경우 URL 별도 처리
+                if region == "DE":
+                    if number in [
+                        "970735-01",
+                        "970736-01",
+                        "969473-01",
+                        "969468-01",
+                    ]:
+                        new_dyson_url = dyson_url[:-6]
+                        new_number = f"spare-details.{number}"
+                elif region == "ES":
+                    if number in ["969473-01", "969468-01"]:
+                        new_dyson_url = dyson_url[:-6]
+                        new_number = f"spare-details.{number}"
+                response = requests.get(url=f"{new_dyson_url}{new_number}", headers=headers)
+                html_text = response.text
+
+                # US의 경우 "You may also be interested in" 섹션이 존재하므로 제거
+                if html_text.find("You may also") != -1:
+                    html_text = html_text[: html_text.find("You may also")]
+
+                text_index = html_text.find(find_text)
+
+                if name.find("Iron") != -1:
+                    color = "Iron"
+                elif name.find("Copper") != -1:
+                    color = "Copper"
+                elif name.find("Fuchsia") != -1:
+                    color = "Fuchsia"
+                elif name.find("Purple") != -1:
+                    color = "Purple"
+                else:
+                    color = None
+
+                if name.find("(") != -1:
+                    stock, created = Stock.objects.get_or_create(
+                        name=name[: name.find("(")], region=region
+                    )
+                else:
+                    stock, created = Stock.objects.get_or_create(name=name, region=region)
+
+                if text_index != -1:
+                    StockDetail.objects.update_or_create(
+                        stock=stock,
+                        color=color,
+                        link=f"{dyson_url}{number}",
+                        defaults={"is_stock": True},
+                    )
+                else:
+                    StockDetail.objects.update_or_create(
+                        stock=stock,
+                        color=color,
+                        link=f"{dyson_url}{number}",
+                        defaults={"is_stock": False},
+                    )
+                time.sleep(3)
+    except Exception as e:
+        logger.exception(str(e), exc_info=e)
+        pass
