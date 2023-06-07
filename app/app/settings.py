@@ -153,3 +153,26 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = "sven0906@naver.com"
 EMAIL_HOST_PASSWORD = "jjuaddu1004"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# 로깅
+_log_format = "[%(asctime).23s] %(levelname)-8s - %(process)-6d - %(name)s:%(lineno)s - %(message)s"  # noqa: B950
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {"format": _log_format, "datefmt": "%Y/%m/%d %H:%M:%S.%s"},
+    },
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/app.log"),
+            "formatter": "verbose",
+            "maxBytes": 1024 * 1024 * 30,  # 30MB
+            "backupCount": 100,
+        },
+    },
+    "loggers": {
+        "django": {"handlers": ["file"], "level": "INFO"},
+    },
+}
