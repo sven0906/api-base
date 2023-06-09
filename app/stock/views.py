@@ -31,8 +31,12 @@ class StockViewSet(
     ]
 
     def list(self, request, *args, **kwargs):
-        items = get_stock_list_for_table()
-        send_mail(items)
+        region = request.GET.get("region")
+        if region:
+            crawler_dyson_stocks(region)
+        else:
+            items = get_stock_list_for_table()
+            send_mail(items)
         return Response(status=status.HTTP_200_OK)
 
 
