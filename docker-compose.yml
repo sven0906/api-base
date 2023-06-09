@@ -24,11 +24,11 @@ services:
       args:
         - DEV=true
     ports:
-      - "8000:8000"
+      - "8080:8080"
     volumes:
       - ./app:/app
     command: >
-      sh -c "python manage.py migrate && python manage.py collectstatic && python manage.py runserver --noreload"
+      sh -c "python manage.py migrate && python manage.py collectstatic && python manage.py runserver 8080 --noreload"
     depends_on:
       db:
         condition: service_healthy
