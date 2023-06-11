@@ -1,6 +1,19 @@
-version: "3.7"
+version: "3.8"
 
 services:
+  nginx:
+    build: ./config/nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - type: volume
+        source: static-volume
+        target: /vol/web/static
+        volume:
+          nocopy: true
+    depends_on:
+      - web
   db:
     image: mysql
     container_name: "mysql_service"
@@ -18,22 +31,28 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
-  app:
+  web:
     build:
       context: .
-      args:
-        - DEV=true
+#      args:
+#        - DEV=true
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - type: volume
+        source: static-volume
+        target: /vol/web/static
+        volume:
+          nocopy: true
     command: >
-      sh -c "python manage.py migrate && python manage.py collectstatic --no-input && python manage.py runserver 0.0.0.0:8000 --noreload"
+       sh -c "python manage.py collectstatic --no-input && 
+              cd /app && gunicorn app.wsgi:application --bind 0:8000"
     depends_on:
       db:
         condition: service_healthy
 volumes:
   mysql-data:
+  static-volume:
 
 
 

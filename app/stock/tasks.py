@@ -19,6 +19,7 @@ def task_send_mail():
     email.content_subtype = "html"
     email.send()
 
+
 @background(schedule=30)
 def task_crawler_dyson():
     threads = []
