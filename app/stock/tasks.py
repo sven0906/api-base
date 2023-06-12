@@ -24,7 +24,8 @@ def task_send_mail():
 def task_crawler_dyson():
     threads = []
     with transaction.atomic():
-        for region in ["DE", "IT", "FR", "US", "JP", "HK", "KR", "NL", "ES"]:
+        # for region in ["DE", "IT", "FR", "US", "JP", "HK", "KR", "NL", "ES"]:
+        for region in ["DE", "IT", "FR", "US", "JP", "NL", "ES"]:
             t = threading.Thread(target=crawler_dyson_stocks, args=(region,))
             t.start()
             threads.append(t)
