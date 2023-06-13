@@ -41,6 +41,7 @@ def get_stock_list_for_table() -> list:
         | stock_list_qs.filter(name__startswith="Travel pouch")
         | stock_list_qs.filter(name__startswith="Big Travel pouch")
         | stock_list_qs.filter(name__startswith="Evaporator")
+        | stock_list_qs.filter(name__startswith="Storage Stand")
     )
 
     items = stock_list_qs.values_list(
@@ -83,6 +84,7 @@ def list_to_html(items: list) -> str:
         ("Evaporator", "증발기"),
         ("Travel pouch", "작파"),
         ("Big Travel pouch", "큰파"),
+        ("Storage Stand", "스탠드"),
     ]
     alist = []
     for key, value in present_list:
@@ -90,6 +92,7 @@ def list_to_html(items: list) -> str:
         iron = ""
         copper = ""
         purple = ""
+        blank = ""
         for item in items:
             if item[1] == key and item[2] == "Fuchsia" and item[3]:
                 fuchsia += (
@@ -111,6 +114,10 @@ def list_to_html(items: list) -> str:
                 purple += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] == "Purple") and not item[3]:
                 purple += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+            if item[1] == key and item[2] is None and item[3]:
+                blank += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
+            elif (item[1] == key and item[2] is None) and not item[3]:
+                blank += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
 
         alist.append(
             {
@@ -119,6 +126,7 @@ def list_to_html(items: list) -> str:
                 "코퍼": "·".join(copper.split("\n")),
                 "아이언": "·".join(iron.split("\n")),
                 "퍼플": "·".join(purple.split("\n")),
+                "-": "·".join(blank.split("\n")),
             }
         )
 
