@@ -260,7 +260,7 @@ def crawler_dyson_stocks(region="UK"):
         "Small round volumising brush(Nickel / Fuchsia)": "971893-01",
         "upgrade kit: Complete long": "971874-17",
         "upgrade kit: Complete": "971874-16",
-        "Evaporator": "spare-details.970718-01",  # 증발기
+        "Evaporator": "970718-01",  # 증발기
         "Travel pouch(Black / Fuchsia)": "971074-01",  # 작은 파우치(핑크)
         "Travel pouch(Black / Copper)": "971074-03",  # 작은 파우치(코퍼)
         "Travel pouch(Purple / Black)": "971074-02",  # 작은 파우치(퍼플)
@@ -397,6 +397,11 @@ def crawler_dyson_stocks(region="UK"):
                     "969468-01",
                 ] and region in ["NL"]:
                     continue
+
+                # 증발기 별도 처리
+                if number == "970718-01":
+                    new_dyson_url = dyson_url[:-6]
+                    new_number = f"spare-details.{number}"
 
                 # 독일, 스페인의 경우 URL 별도 처리
                 if region == "DE":
