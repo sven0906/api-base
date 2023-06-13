@@ -7,11 +7,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - type: volume
-        source: static-volume
-        target: /vol/web/static
-        volume:
-          nocopy: true
+      - static-volume:/app/static
     depends_on:
       - web
   db:
@@ -39,17 +35,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - type: volume
-        source: static-volume
-        target: /vol/web/static
-        volume:
-          nocopy: true
+      - static-volume:/app/static
     command: >
-       sh -c "python manage.py collectstatic --no-input && python manage.py migrate &&
+       sh -c "python manage.py migrate &&
               cd /app && gunicorn app.wsgi:application --bind 0:8000"
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - .env
 volumes:
   mysql-data:
   static-volume:

@@ -1,6 +1,7 @@
 FROM python:3.7-alpine
 MAINTAINER Deven Ltd
 
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFRERED 1
 
 COPY ./requirements.txt /requirements.txt
@@ -14,19 +15,25 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN mkdir /app
-WORKDIR /app
-COPY ./app /app
+RUN mkdir -p /app
 
-RUN mkdir -p /vol/web/media
-RUN mkdir -p /vol/web/static
-RUN adduser -D user
-RUN chown -R user:user /vol/
-RUN chmod -R 755 /vol/web
+RUN addgroup -S app && adduser -S app -G app
 
-RUN chown -R user:user /app/
-RUN chmod -R 755 /app/logs
-USER user
+ENV APP_HOME=/app
+WORKDIR $APP_HOME
+COPY ./app $APP_HOME
+
+RUN chown -R app:app $APP_HOME
+
+#RUN mkdir -p /vol/web/media
+#RUN mkdir -p /vol/web/static
+#RUN adduser -D user
+#RUN chown -R user:user /vol/
+#RUN chmod -R 755 /vol/web
+#
+#RUN chown -R user:user /app/
+#RUN chmod -R 755 /app/logs
+USER app
 
 
 
