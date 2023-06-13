@@ -38,6 +38,9 @@ def get_stock_list_for_table() -> list:
         | stock_list_qs.filter(name__startswith="40mm Airwrap")
         | stock_list_qs.filter(name__startswith="30mm Airwrap")
         | stock_list_qs.filter(name__startswith="20mm Airwrap")
+        | stock_list_qs.filter(name__startswith="Travel pouch")
+        | stock_list_qs.filter(name__startswith="Big Travel pouch")
+        | stock_list_qs.filter(name__startswith="Evaporator")
     )
 
     items = stock_list_qs.values_list(
