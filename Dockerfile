@@ -22,6 +22,7 @@ RUN addgroup -S app && adduser -S app -G app
 ENV APP_HOME=/app
 WORKDIR $APP_HOME
 COPY ./app $APP_HOME
+RUN python manage.py collectstatic --no-input
 
 RUN chown -R app:app $APP_HOME
 
