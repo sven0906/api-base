@@ -77,6 +77,9 @@ def list_to_html(items: list) -> str:
         ("20mm Airwrap™ long barrel", "롱20(구)"),
         ("40mm Airwrap™ barrel", "숏40(구)"),
         ("30mm Airwrap™ barrel", "숏30(구)"),
+        ("Evaporator", "증발기"),
+        ("Travel pouch", "작파"),
+        ("Big Travel pouch", "큰파"),
     ]
     alist = []
     for key, value in present_list:
@@ -246,6 +249,14 @@ def crawler_dyson_stocks(region="UK"):
         "Small round volumising brush(Nickel / Fuchsia)": "971893-01",
         "upgrade kit: Complete long": "971874-17",
         "upgrade kit: Complete": "971874-16",
+        "Evaporator": "spare-details.970718-01",  # 증발기
+        "Travel pouch(Black / Fuchsia)": "971074-01",  # 작은 파우치(핑크)
+        "Travel pouch(Black / Copper)": "971074-03",  # 작은 파우치(코퍼)
+        "Travel pouch(Purple / Black)": "971074-02",  # 작은 파우치(퍼플)
+        "Big Travel pouch(Black / Fuchsia)": "971313-01",  # 큰 파우치(핑크)
+        "Big Travel pouch(Purple / Black)": "971313-02",  # 큰 파우치(퍼플)
+        "Storage Stand(White / Fuchsia)": "971425-01",  # 스탠드(핑크)
+        "Storage Stand(White / Purple)": "971425-02",  # 스탠드(퍼플)
     }
 
     try:

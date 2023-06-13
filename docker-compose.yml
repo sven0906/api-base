@@ -45,7 +45,7 @@ services:
         volume:
           nocopy: true
     command: >
-       sh -c "python manage.py collectstatic --no-input && 
+       sh -c "python manage.py collectstatic --no-input && python manage.py migrate &&
               cd /app && gunicorn app.wsgi:application --bind 0:8000"
     depends_on:
       db:
