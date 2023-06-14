@@ -299,7 +299,7 @@ def crawler_dyson_stocks(region="UK"):
                     "969473-01",
                     "969466-01",
                     "969468-01",
-                    "spare-details.970718-01",  # 증발기
+                    "970718-01",  # 증발기
                     "971074-01",  # 작은 파우치(핑크)
                     "971074-03",  # 작은 파우치(코퍼)
                     "971074-02",  # 작은 파우치(퍼플)
@@ -448,14 +448,14 @@ def crawler_dyson_stocks(region="UK"):
                     StockDetail.objects.update_or_create(
                         stock=stock,
                         color=color,
-                        link=f"{dyson_url}{number}",
+                        link=f"{new_dyson_url}{new_number}",
                         defaults={"is_stock": True},
                     )
                 else:
                     StockDetail.objects.update_or_create(
                         stock=stock,
                         color=color,
-                        link=f"{dyson_url}{number}",
+                        link=f"{new_dyson_url}{new_number}",
                         defaults={"is_stock": False},
                     )
                 time.sleep(3)
