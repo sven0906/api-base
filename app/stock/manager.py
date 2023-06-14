@@ -6,6 +6,7 @@ from stock.models import Stock, StockDetail
 
 logger = logging.getLogger(__name__)
 
+# HK, KR
 DYSON_NAME = {
     "New Coanda smoothing dryer(Nickel / Iron)": "coanda-smoothing-dryer-iron-nickel",
     "New Coanda smoothing dryer(Nickel / Copper)": "coanda-smoothing-dryer-iron-copper",
@@ -42,6 +43,7 @@ def get_stock_list_for_table() -> list:
         | stock_list_qs.filter(name__startswith="Big Travel pouch")
         | stock_list_qs.filter(name__startswith="Evaporator")
         | stock_list_qs.filter(name__startswith="Storage Stand")
+        | stock_list_qs.filter(name__startswith="Pre-styling dryer")
     )
 
     items = stock_list_qs.values_list(
@@ -85,6 +87,7 @@ def list_to_html(items: list) -> str:
         ("Travel pouch", "작파"),
         ("Big Travel pouch", "큰파"),
         ("Storage Stand", "스탠드"),
+        ("Pre-styling dryer", "드라이어"),
     ]
     alist = []
     for key, value in present_list:
@@ -92,8 +95,10 @@ def list_to_html(items: list) -> str:
         iron = ""
         copper = ""
         purple = ""
+        red = ""
         blank = ""
         for item in items:
+            # 핑크 색상
             if item[1] == key and item[2] == "Fuchsia" and item[3]:
                 fuchsia += (
                     f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
@@ -102,18 +107,27 @@ def list_to_html(items: list) -> str:
                 fuchsia += (
                     f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
                 )
+            # 아이언 색상
             if item[1] == key and item[2] == "Iron" and item[3]:
                 iron += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] == "Iron") and not item[3]:
                 iron += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+            # 코퍼 색상
             if item[1] == key and item[2] == "Copper" and item[3]:
                 copper += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] == "Copper") and not item[3]:
                 copper += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+            # 퍼플 색상
             if item[1] == key and item[2] == "Purple" and item[3]:
                 purple += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] == "Purple") and not item[3]:
                 purple += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+            # 레드 색상
+            if item[1] == key and item[2] == "Red" and item[3]:
+                red += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
+            elif (item[1] == key and item[2] == "Red") and not item[3]:
+                red += f'<a href="{item[4]}" target="_blank" style="color:gray">{item[0]}</a>\n'
+            # 색상 없음
             if item[1] == key and item[2] is None and item[3]:
                 blank += f'<a href="{item[4]}" target="_blank" style="color:blue">{item[0]}</a>\n'
             elif (item[1] == key and item[2] is None) and not item[3]:
@@ -126,6 +140,7 @@ def list_to_html(items: list) -> str:
                 "코퍼": "·".join(copper.split("\n")),
                 "아이언": "·".join(iron.split("\n")),
                 "퍼플": "·".join(purple.split("\n")),
+                "레드": "·".join(red.split("\n")),
                 "-": "·".join(blank.split("\n")),
             }
         )
@@ -268,6 +283,10 @@ def crawler_dyson_stocks(region="UK"):
         "Big Travel pouch(Purple / Black)": "971313-02",  # 큰 파우치(퍼플)
         "Storage Stand(White / Fuchsia)": "971425-01",  # 스탠드(핑크)
         "Storage Stand(White / Purple)": "971425-02",  # 스탠드(퍼플)
+        "Pre-styling dryer(Fuchsia)": "969759-01",  # 구형드라이어(핑크)
+        "Pre-styling dryer(Copper)": "969759-05",  # 구형드라이어(코퍼)
+        "Pre-styling dryer(Purple)": "969759-02",  # 구형드라이어(퍼플)
+        "Pre-styling dryer(Red)": "969759-03",  # 구형드라이어(레드)
     }
 
     try:
@@ -307,6 +326,10 @@ def crawler_dyson_stocks(region="UK"):
                     "971313-02",  # 큰 파우치(퍼플)
                     "971425-01",  # 스탠드(핑크)
                     "971425-02",  # 스탠드(퍼플)
+                    "969759-01",  # 구형드라이어(핑크)
+                    "969759-05",  # 구형드라이어(코퍼)
+                    "969759-02",  # 구형드라이어(퍼플)
+                    "969759-03",  # 구형드라이어(레드)
                 ]:
                     continue
 
@@ -389,12 +412,15 @@ def crawler_dyson_stocks(region="UK"):
                     "970290-02",
                     "970289-01",
                     "970289-02",
-                    "970735-01",
                     "970736-01",
-                    "969470-01",
                     "969473-01",
                     "969466-01",
                     "969468-01",
+                    "361309-01",  # 30mm 구형 숏배럴(핑크)
+                    "969470-01",  # 40mm 구형 숏배럴(핑크)
+                    "970735-01",  # 20mm 구형 롱배럴(핑크)
+                    "971888-05",  # 30mm 구형 롱배럴(핑크)
+                    "969759-01",  # 구형 드라이어(핑크)
                 ] and region in ["NL"]:
                     continue
 
@@ -402,6 +428,26 @@ def crawler_dyson_stocks(region="UK"):
                 if number == "970718-01":
                     new_dyson_url = dyson_url[:-6]
                     new_number = f"spare-details.{number}"
+
+                # 구형 드라이어 별도 처리
+                if number in ["969759-01", "969759-05", "969759-02", "969759-03"]:
+                    if region in ["DE", "FR", "ES", "US"]:
+                        if number == "969759-01" and region in ["FR", "US"]:
+                            new_dyson_url = dyson_url[:-6]
+                            new_number = f"spare-details.{number}"
+                        elif number == "969759-05" and region in ["FR", "US"]:
+                            new_dyson_url = dyson_url[:-6]
+                            new_number = f"spare-details.{number}"
+                        elif number == "969759-02" and region in ["DE", "FR", "US"]:
+                            new_dyson_url = dyson_url[:-6]
+                            new_number = f"spare-details.{number}"
+                        elif number == "969759-03" and region in ["DE", "FR"]:
+                            new_dyson_url = dyson_url[:-6]
+                            new_number = f"spare-details.{number}"
+                        else:
+                            pass
+                    else:
+                        continue
 
                 # 독일, 스페인의 경우 URL 별도 처리
                 if region == "DE":
@@ -434,6 +480,8 @@ def crawler_dyson_stocks(region="UK"):
                     color = "Fuchsia"
                 elif name.find("Purple") != -1:
                     color = "Purple"
+                elif name.find("Red") != -1:
+                    color = "Red"
                 else:
                     color = None
 
