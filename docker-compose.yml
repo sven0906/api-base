@@ -1,14 +1,51 @@
-version: "3.7"
+version: "3.8"
 
 services:
-  app:
+  nginx:
+    build: ./config/nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - static-volume:/app/static
+    depends_on:
+      - web
+  db:
+    image: mysql
+    container_name: "mysql_service"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=admin
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+  web:
     build:
       context: .
-      args:
-        - DEV=true
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - static-volume:/app/static
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+       sh -c "python manage.py migrate &&
+              cd /app && gunicorn app.wsgi:application --bind 0:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+#    env_file:
+#      - .env
+volumes:
+  mysql-data:
+  static-volume:
+
+
+
+
+
